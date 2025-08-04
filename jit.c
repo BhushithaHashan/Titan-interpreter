@@ -20,7 +20,9 @@ int main(){
     {
         printf("permission on mem changed\n");
     }
-    
+    int (*add)(int,int) = mem;
+    int val = add(5,5);
+    printf("%d\n",val);
     
 
 }
