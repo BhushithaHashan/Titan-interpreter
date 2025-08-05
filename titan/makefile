@@ -1,25 +1,29 @@
-# Compiler and Flags
 CC = gcc
 CFLAGS = -Iinclude -Wall -Wextra -g
 
-# Folders
 SRC_DIR = src
 OBJ_DIR = obj
-INC_DIR = include
 
-# Files
 SRCS = $(wildcard $(SRC_DIR)/*.c) main.c
-OBJS = $(SRCS:.c=.o)
+OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(SRCS)))
+
 TARGET = titan
 
-# The Default Rule (What happens when you type 'make')
+# Default rule
+all: $(TARGET)
+
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-# Rule for .c to .o
-%.o: %.c
+# Compile .c → .o into obj/
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	mkdir -p $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Clean the project
+# Special rule for main.c (since it's not in src/)
+$(OBJ_DIR)/main.o: main.c
+	mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c main.c -o $(OBJ_DIR)/main.o
+
 clean:
-	rm -f $(SRC_DIR)/*.o *.o $(TARGET)
+	rm -rf $(OBJ_DIR) $(TARGET)
