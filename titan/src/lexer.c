@@ -8,6 +8,7 @@
 #include <sys/mman.h>
 #include <string.h>
 #include <stdlib.h>
+#include "memalloc.h"
 
 void lexer_init(Lexer *lexer,char *src){
     lexer->src = src;
@@ -174,6 +175,18 @@ static Token read_identifier(Lexer *lexer) {
     token.lexeme = identifier;
     token.type = TOKEN_IDENTIFIER;
     return token;
+}
+static Token read_string(Lexer *lexer){
+    advance(lexer);
+    const char *start = lexer->src+lexer->pos;
+    int strlen = 0;
+    while (lexer->current_pointed_char!='"')
+    {
+        strlen++;
+        advance(lexer);
+    }
+    void *mem = (void *)syscall()
+    
 }
 Token lexer_next_token(Lexer *lexer);
 
