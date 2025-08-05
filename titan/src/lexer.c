@@ -94,68 +94,86 @@ static Token read_number(Lexer *lexer){
     token.value = number;
     return token;
 }
-static Token read_identifier(Lexer *lexer){
+static Token read_identifier(Lexer *lexer) {
     Token token;
-    const char *start = lexer->src+lexer->pos;
+
+    const char *start = lexer->src + lexer->pos;
     int len = 0;
-    while (isalnum(lexer->current_pointed_char)||lexer->current_pointed_char=='_')
-    {
+
+    while (isalnum(lexer->current_pointed_char) || lexer->current_pointed_char == '_') {
         len++;
         advance(lexer);
     }
-    printf("len:%d\n",len);
-    void *mem = (void *)syscall(SYS_mmap,NULL,sizeof(char)*(len+1),PROT_READ|PROT_WRITE,MAP_ANONYMOUS|MAP_PRIVATE,-1,0);
-    if (mem==(void *)-1)
-    {
+
+    void *mem = (void *)syscall(SYS_mmap, NULL, sizeof(char) * (len + 1),
+                                PROT_READ | PROT_WRITE,
+                                MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    if (mem == (void *)-1) {
         perror("mmap error\n");
         exit(1);
     }
+
     char *identifier = mem;
-    memcpy(identifier,start,len);
+    memcpy(identifier, start, len);
     identifier[len] = '\0';
-    printf("%s\n",identifier);
+
+    // Quick first-letter dispatch
     switch (identifier[0]) {
         case 'l':
-            if (strcmp(identifier, "let") == 0){
+            if (strcmp(identifier, "let") == 0) {
                 token.lexeme = identifier;
                 token.type = TOKEN_LET;
                 return token;
-            }   
+            }
             break;
         case 'i':
-            if (strcmp(identifier, "if") == 0){
+            if (strcmp(identifier, "if") == 0) {
                 token.lexeme = identifier;
                 token.type = TOKEN_IF;
                 return token;
             }
-                
             break;
-
-        // case 'w':
-        //     if (strcmp(identifier, "while") == 0)
-        //         return TOKEN_WHILE;
-        //     break;
-
-        // case 'f':
-        //     if (strcmp(identifier, "function") == 0)
-        //         return TOKEN_FUNCTION;
-        //     break;
-
-        // case 'r':
-        //     if (strcmp(identifier, "return") == 0)
-        //         return TOKEN_RETURN;
-        //     break;
-
-        // case 'p':
-        //     if (strcmp(identifier, "print") == 0)
-        //         return TOKEN_PRINT;
-        //     break;
-        default:
-            token.lexeme = identifier;
-            token.type = TOKEN_IDENTIFIER;
-            return token;
+        case 'e':
+            if (strcmp(identifier, "else") == 0) {
+                token.lexeme = identifier;
+                token.type = TOKEN_ELSE;
+                return token;
+            }
+            break;
+        case 'w':
+            if (strcmp(identifier, "while") == 0) {
+                token.lexeme = identifier;
+                token.type = TOKEN_WHILE;
+                return token;
+            }
+            break;
+        case 'f':
+            if (strcmp(identifier, "function") == 0) {
+                token.lexeme = identifier;
+                token.type = TOKEN_FUNCTION;
+                return token;
+            }
+            break;
+        case 'r':
+            if (strcmp(identifier, "return") == 0) {
+                token.lexeme = identifier;
+                token.type = TOKEN_RETURN;
+                return token;
+            }
+            break;
+        case 'p':
+            if (strcmp(identifier, "print") == 0) {
+                token.lexeme = identifier;
+                token.type = TOKEN_PRINT;
+                return token;
+            }
             break;
     }
+
+    // If none of the keywords matched, it’s a normal identifier
+    token.lexeme = identifier;
+    token.type = TOKEN_IDENTIFIER;
+    return token;
 }
 Token lexer_next_token(Lexer *lexer);
 
