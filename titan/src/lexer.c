@@ -95,6 +95,7 @@ static Token read_number(Lexer *lexer){
     memcpy(numberstr,start,count);
     numberstr[count] = '\0';
     token.lexeme = numberstr;
+    token.size_lexeme =count+1;
     for (size_t i = 0; i < count; i++)
     {
         int digit =numberstr[i]-48;
@@ -125,55 +126,50 @@ static Token read_identifier(Lexer *lexer) {
 
     char *identifier = mem;
     memcpy(identifier, start, len);
+    token.lexeme = identifier;
+    token.size_lexeme = sizeof(char) * (len + 1);
     identifier[len] = '\0';
 
     // Quick first-letter dispatch
     switch (identifier[0]) {
         case 'l':
             if (strcmp(identifier, "let") == 0) {
-                token.lexeme = identifier;
                 token.type = TOKEN_LET;
                 return token;
             }
             break;
         case 'i':
             if (strcmp(identifier, "if") == 0) {
-                token.lexeme = identifier;
                 token.type = TOKEN_IF;
                 return token;
             }
             break;
         case 'e':
             if (strcmp(identifier, "else") == 0) {
-                token.lexeme = identifier;
                 token.type = TOKEN_ELSE;
                 return token;
             }
             break;
         case 'w':
             if (strcmp(identifier, "while") == 0) {
-                token.lexeme = identifier;
                 token.type = TOKEN_WHILE;
                 return token;
             }
             break;
         case 'f':
             if (strcmp(identifier, "function") == 0) {
-                token.lexeme = identifier;
                 token.type = TOKEN_FUNCTION;
                 return token;
             }
             break;
         case 'r':
             if (strcmp(identifier, "return") == 0) {
-                token.lexeme = identifier;
                 token.type = TOKEN_RETURN;
                 return token;
             }
             break;
         case 'p':
             if (strcmp(identifier, "print") == 0) {
-                token.lexeme = identifier;
                 token.type = TOKEN_PRINT;
                 return token;
             }
@@ -181,7 +177,6 @@ static Token read_identifier(Lexer *lexer) {
     }
 
     // If none of the keywords matched, it’s a normal identifier
-    token.lexeme = identifier;
     token.type = TOKEN_IDENTIFIER;
     return token;
 }
@@ -209,10 +204,65 @@ static Token read_string(Lexer *lexer){
     printf("%s\n",string_val);
     token.type = TOKEN_STRING;
     token.lexeme = string_val;
+    token.size_lexeme = str_len+1;
     return token;
 
 }
 Token lexer_next_token(Lexer *lexer){
+    skip_white_spaces(lexer);
+    if (isdigit(lexer->current_pointed_char))
+    {
+        return read_number(lexer);
+    }
+    if (isalnum(lexer->current_pointed_char)||lexer->current_pointed_char=='_')
+    {
+        return read_identifier(lexer);
+    }
+    if (lexer->current_pointed_char=='"')
+    {
+        return read_string(lexer);
+    }
+    if (lexer->current_pointed_char == '=')
+    {
+        char neighbour = peek(lexer);
+        if (neighbour=='=')
+        {
+            void *mem = memalloc(3,PROT_READ|PROT_WRITE,MAP_ANONYMOUS|MAP_PRIVATE);
+            if (mem==(void *)-1)
+            {
+                perror("Mem allocation error!!\n");
+                exit(1);
+            }
+            Token token;
+            token.col_num = lexer->col_num;
+            token.line_number = lexer->line_number;
+            char *str = mem;
+            str[0] = '=';
+            str[1] = '=';
+            str[2] = '\0';
+            token.lexeme = str;
+            token.size_lexeme = 3;
+            token.type = TOKEN_EQEQ;
+            advance(lexer);
+            advance(lexer);
+            return token;
+        }
+        void *mem = memalloc(2,PROT_READ|PROT_WRITE,MAP_ANONYMOUS|MAP_PRIVATE);
+        char *str = mem;
+        str[0] = '=';
+        str[1] = '\0';
+        Token token;
+        token.col_num = lexer->col_num;
+        token.line_number = lexer->line_number;
+        token.lexeme = str;
+        token.size_lexeme = 2;
+        token.type = TOKEN_EQUAL;
+        advance(lexer);
+        return token;
+    }
+    
+    
+    
     
 }
 
