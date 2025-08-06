@@ -210,73 +210,164 @@ static Token read_string(Lexer *lexer){
 }
 Token lexer_next_token(Lexer *lexer){
     skip_white_spaces(lexer);
+
     if (isdigit(lexer->current_pointed_char))
-    {
         return read_number(lexer);
-    }
-    if (isalnum(lexer->current_pointed_char)||lexer->current_pointed_char=='_')
-    {
+
+    if (isalnum(lexer->current_pointed_char) || lexer->current_pointed_char == '_')
         return read_identifier(lexer);
-    }
-    if (lexer->current_pointed_char=='"')
-    {
+
+    if (lexer->current_pointed_char == '"')
         return read_string(lexer);
-    }
-    if (lexer->current_pointed_char == '=')
-    {
-        char neighbour = peek(lexer);
-        if (neighbour=='=')
-        {
-            void *mem = memalloc(3,PROT_READ|PROT_WRITE,MAP_ANONYMOUS|MAP_PRIVATE);
-            if (mem==(void *)-1)
-            {
-                perror("Mem allocation error!!\n");
-                exit(1);
-            }
-            Token token;
-            token.col_num = lexer->col_num;
-            token.line_number = lexer->line_number;
-            char *str = mem;
-            str[0] = '=';
-            str[1] = '=';
-            str[2] = '\0';
-            token.lexeme = str;
-            token.size_lexeme = 3;
+
+    Token token;
+    token.col_num = lexer->col_num;
+    token.line_number = lexer->line_number;
+    token.lexeme = NULL;
+    token.size_lexeme = 0;
+    token.value = 0;
+
+    // =
+    if (lexer->current_pointed_char == '=') {
+        if (peek(lexer) == '=') {
             token.type = TOKEN_EQEQ;
             advance(lexer);
             advance(lexer);
             return token;
         }
-        void *mem = memalloc(2,PROT_READ|PROT_WRITE,MAP_ANONYMOUS|MAP_PRIVATE);
-        char *str = mem;
-        str[0] = '=';
-        str[1] = '\0';
-        Token token;
-        token.col_num = lexer->col_num;
-        token.line_number = lexer->line_number;
-        token.lexeme = str;
-        token.size_lexeme = 2;
         token.type = TOKEN_EQUAL;
         advance(lexer);
         return token;
     }
-    
-    
-    
-    
+
+    // !
+    if (lexer->current_pointed_char == '!') {
+        if (peek(lexer) == '=') {
+            token.type = TOKEN_NEQ;
+            advance(lexer);
+            advance(lexer);
+            return token;
+        }
+        printf("Unexpected character ! at %d:%d\n", lexer->line_number, lexer->col_num);
+        exit(1);
+    }
+
+    // <
+    if (lexer->current_pointed_char == '<') {
+        if (peek(lexer) == '=') {
+            token.type = TOKEN_LTEQ;
+            advance(lexer);
+            advance(lexer);
+            return token;
+        }
+        token.type = TOKEN_LT;
+        advance(lexer);
+        return token;
+    }
+
+    // >
+    if (lexer->current_pointed_char == '>') {
+        if (peek(lexer) == '=') {
+            token.type = TOKEN_GTEQ;
+            advance(lexer);
+            advance(lexer);
+            return token;
+        }
+        token.type = TOKEN_GT;
+        advance(lexer);
+        return token;
+    }
+
+    // Single character tokens
+    switch (lexer->current_pointed_char) {
+        case '+':
+            token.type = TOKEN_PLUS;
+            advance(lexer);
+            return token;
+
+        case '-':
+            token.type = TOKEN_MINUS;
+            advance(lexer);
+            return token;
+
+        case '*':
+            token.type = TOKEN_STAR;
+            advance(lexer);
+            return token;
+
+        case '/':
+            token.type = TOKEN_SLASH;
+            advance(lexer);
+            return token;
+
+        case '(':
+            token.type = TOKEN_LPAREN;
+            advance(lexer);
+            return token;
+
+        case ')':
+            token.type = TOKEN_RPAREN;
+            advance(lexer);
+            return token;
+
+        case '{':
+            token.type = TOKEN_LBRACE;
+            advance(lexer);
+            return token;
+
+        case '}':
+            token.type = TOKEN_RBRACE;
+            advance(lexer);
+            return token;
+
+        case ';':
+            token.type = TOKEN_SEMICOLON;
+            advance(lexer);
+            return token;
+
+        case ',':
+            token.type = TOKEN_COMMA;
+            advance(lexer);
+            return token;
+
+        case '\0':
+            token.type = TOKEN_EOF;
+            return token;
+    }
+
+    printf("Unknown character: %c at %d:%d\n",
+           lexer->current_pointed_char,
+           lexer->line_number,
+           lexer->col_num);
+    exit(1);
 }
 
-int main(){
-    char *src = "1234";
-    char *idensrc ="if";
-    char *strsrc = "\"hello\"";
+int main() {
+    char *src =
+        "let x = 10;\n"
+        "if (x >= 5) {\n"
+        "    print(\"hello\");\n"
+        "}\n";
+
     Lexer lexer;
-    lexer_init(&lexer,strsrc);
-    printf("%s\n",strsrc);
-    Token tokenstr = read_string(&lexer);
-    // Token tokeniden = read_identifier(&lexer);
-    // Token token = read_number(&lexer);
-    // printf("lexeme:%s\tvalue:%d\n",token.lexeme,token.value);
-    // printf("lexeme:%s\tType:%d\n",tokeniden.lexeme,tokeniden.type);
-    printf("str:%s\t token type:%d\n",tokenstr.lexeme,tokenstr.type);
+    lexer_init(&lexer, src);
+
+    while (1) {
+        Token t = lexer_next_token(&lexer);
+
+        printf("Token type: %d", t.type);
+
+        if (t.lexeme != NULL)
+            printf(" | lexeme: %s", t.lexeme);
+
+        if (t.type == TOKEN_NUMBER)
+            printf(" | value: %d", t.value);
+
+        printf(" | line: %d col: %d\n", t.line_number, t.col_num);
+
+        if (t.type == TOKEN_EOF)
+            break;
+    }
+
+    return 0;
 }
