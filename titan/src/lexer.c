@@ -178,25 +178,42 @@ static Token read_identifier(Lexer *lexer) {
 }
 static Token read_string(Lexer *lexer){
     advance(lexer);
+    Token token;
     const char *start = lexer->src+lexer->pos;
-    int strlen = 0;
-    while (lexer->current_pointed_char!='"')
+    int str_len = 0;
+    while (lexer->current_pointed_char!='"' && lexer->current_pointed_char!='\0')
     {
-        strlen++;
+        str_len++;
         advance(lexer);
     }
-    void *mem = (void *)syscall()
-    
+    advance(lexer);
+    void *mem = memalloc(str_len+1,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS);
+    if (mem==(void *)-1)
+    {
+        exit(1);
+    }
+    char *string_val = mem;
+    memcpy(string_val,start,strlen);
+    string_val[str_len] = '\0';
+    printf("%s\n",string_val);
+    token.type = TOKEN_STRING;
+    token.lexeme = string_val;
+    return token;
+
 }
 Token lexer_next_token(Lexer *lexer);
 
 int main(){
     char *src = "1234";
     char *idensrc ="if";
+    char *strsrc = "\"hello\"";
     Lexer lexer;
-    lexer_init(&lexer,idensrc);
-    Token tokeniden = read_identifier(&lexer);
+    lexer_init(&lexer,strsrc);
+    printf("%s\n",strsrc);
+    Token tokenstr = read_string(&lexer);
+    // Token tokeniden = read_identifier(&lexer);
     // Token token = read_number(&lexer);
     // printf("lexeme:%s\tvalue:%d\n",token.lexeme,token.value);
-    printf("lexeme:%s\tType:%d\n",tokeniden.lexeme,tokeniden.type);
+    // printf("lexeme:%s\tType:%d\n",tokeniden.lexeme,tokeniden.type);
+    printf("str:%s\t token type:%d\n",tokenstr.lexeme,tokenstr.type);
 }
