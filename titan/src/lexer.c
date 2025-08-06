@@ -201,7 +201,9 @@ static Token read_string(Lexer *lexer){
     return token;
 
 }
-Token lexer_next_token(Lexer *lexer);
+Token lexer_next_token(Lexer *lexer){
+    
+}
 
 int main(){
     char *src = "1234";
