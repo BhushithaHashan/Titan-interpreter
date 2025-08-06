@@ -1,7 +1,6 @@
 *
 !*.c
-!/*
+!*/
 !*.md
 !makefile
 !*.h
-!./titan/src

@@ -14,17 +14,23 @@ void lexer_init(Lexer *lexer,char *src){
     lexer->src = src;
     lexer->pos = 0;
     lexer->current_pointed_char = src[0];
+    lexer->line_number = 1;
+    lexer->col_num = 1;
 }
 static void advance(Lexer *lexer){
-    lexer->pos++;
-    if (lexer->src[lexer->pos]!='\0')
-    {
-        lexer->current_pointed_char = lexer->src[lexer->pos];
-        return;
+    if (lexer->current_pointed_char == '\n') {
+        lexer->line_number++;
+        lexer->col_num = 1;
+    } else {
+        lexer->col_num++;
     }
-    lexer->current_pointed_char = '\0';
-    return;
-    
+
+    lexer->pos++;
+
+    if (lexer->src[lexer->pos] != '\0')
+        lexer->current_pointed_char = lexer->src[lexer->pos];
+    else
+        lexer->current_pointed_char = '\0';
 }
 static void skip_white_spaces(Lexer *lexer){
     while (1)
@@ -64,6 +70,8 @@ static Token read_number(Lexer *lexer){
     int number = 0;
     Token token;
     token.type = TOKEN_NUMBER;
+    token.line_number = lexer->line_number;
+    token.col_num = lexer->col_num;
     const char *start = lexer->src+lexer->pos;
     char *numberstr;
     int count = 0;
@@ -97,7 +105,8 @@ static Token read_number(Lexer *lexer){
 }
 static Token read_identifier(Lexer *lexer) {
     Token token;
-
+    token.line_number = lexer->line_number;
+    token.col_num = lexer->col_num;
     const char *start = lexer->src + lexer->pos;
     int len = 0;
 
@@ -179,6 +188,8 @@ static Token read_identifier(Lexer *lexer) {
 static Token read_string(Lexer *lexer){
     advance(lexer);
     Token token;
+    token.line_number = lexer->line_number;
+    token.col_num = lexer->col_num;
     const char *start = lexer->src+lexer->pos;
     int str_len = 0;
     while (lexer->current_pointed_char!='"' && lexer->current_pointed_char!='\0')
@@ -193,7 +204,7 @@ static Token read_string(Lexer *lexer){
         exit(1);
     }
     char *string_val = mem;
-    memcpy(string_val,start,strlen);
+    memcpy(string_val,start,str_len);
     string_val[str_len] = '\0';
     printf("%s\n",string_val);
     token.type = TOKEN_STRING;
