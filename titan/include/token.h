@@ -36,11 +36,6 @@ typedef enum {
     TOKEN_EOF
 } TokenType;
 typedef struct{
-    Token *tokens;
-    int count;
-    int capasity;
-}Token_Array;
-typedef struct{
     TokenType type;
     char * lexeme;
     int size_lexeme;
@@ -48,5 +43,10 @@ typedef struct{
     int line_number;
     int col_num;
 }Token;
+typedef struct{
+    Token *tokens;
+    int count;
+    int capasity;
+}Token_Array;
 
 #endif
