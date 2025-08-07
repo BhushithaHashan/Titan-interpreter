@@ -342,11 +342,18 @@ Token lexer_next_token(Lexer *lexer){
     exit(1);
 }
 void lex_all(Lexer *lexer,Token_List *token_arr){
-    while (lexer->current_pointed_char != '\0')
-    {
-        push_token(lexer_next_token(lexer),token_arr);
-    }
-    push_token(lexer_next_token(lexer),token_arr);
+    // while (lexer->current_pointed_char != '\0')
+    // {
+    //     push_token(lexer_next_token(lexer),token_arr);
+    // }
+    // push_token(lexer_next_token(lexer),token_arr);
+    Token t;
+    do
+    {   
+        t = lexer_next_token(lexer);
+        push_token(t,token_arr);
+    } while (t.type!=TOKEN_EOF);
+    
     
 }
 int main() {
@@ -358,8 +365,10 @@ int main() {
 
     Lexer lexer;
     lexer_init(&lexer, src);
-
-
+    Token_List list;
+    token_list_init(&list);
+    lex_all(&lexer,&list);
+    printf("%d\n",list.count);
 
 
 

@@ -1,5 +1,7 @@
 #ifndef TITAN_TOKEN_H
 #define TITAN_TOKEN_H
+
+typedef struct Token Token;
 typedef enum {
     TOKEN_NUMBER,
     TOKEN_STRING,
@@ -35,7 +37,8 @@ typedef enum {
 
     TOKEN_EOF
 } TokenType;
-typedef struct{
+
+struct Token{
     TokenType type;
     char * lexeme;
     int size_lexeme;
@@ -43,11 +46,13 @@ typedef struct{
     int line_number;
     int col_num;
     Token *next_token;
-}Token;
+};
 typedef struct{
-    Token *token;
+    Token *head;
+    Token *tail;
     int count;
 }Token_List;
 
 int push_token(Token token,Token_List *list);
+int token_list_init(Token_List *list);
 #endif

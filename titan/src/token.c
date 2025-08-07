@@ -6,6 +6,7 @@
 #include "memalloc.h"
 #include "token.h"
 #include <string.h>
+#include <stdlib.h>
 
 // int push_token(Token token,Token_Array *arr){
 //     int arr_cap = arr->capasity;
@@ -37,20 +38,20 @@ int push_token(Token token,Token_List *list){
             perror("memalloc error at push token\n");
             exit(1);
         }
-    if (list->count==0)
+    token.next_token = NULL;
+    *(Token *)new_token = token;
+    if (list->head==NULL)
     { 
-        list->token = new_token;
+        list->head = new_token;
         list->count++;
+        list->tail = new_token;
         return 1;
     }
-    Token *current_pointed_token = list->token;
-    int token_count = list->count ;
-    while(token_count!=1){
-        current_pointed_token = current_pointed_token->next_token;
-    }
+    Token *current_pointed_token = list->tail;
     current_pointed_token->next_token = new_token;
+    list->tail = new_token;
     list->count++;
-    
+    return 1;
 }
 
 
