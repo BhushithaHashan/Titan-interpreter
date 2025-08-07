@@ -42,12 +42,12 @@ typedef struct{
     int value;
     int line_number;
     int col_num;
+    Token *next_token;
 }Token;
 typedef struct{
-    Token *tokens;
+    Token *token;
     int count;
-    int capasity;
-}Token_Array;
+}Token_List;
 
-int push_token(Token token,Token_Array *arr);
+int push_token(Token token,Token_List *list);
 #endif

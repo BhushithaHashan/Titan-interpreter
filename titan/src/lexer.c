@@ -341,7 +341,14 @@ Token lexer_next_token(Lexer *lexer){
            lexer->col_num);
     exit(1);
 }
-
+void lex_all(Lexer *lexer,Token_List *token_arr){
+    while (lexer->current_pointed_char != '\0')
+    {
+        push_token(lexer_next_token(lexer),token_arr);
+    }
+    push_token(lexer_next_token(lexer),token_arr);
+    
+}
 int main() {
     char *src =
         "let x = 10;\n"
@@ -352,22 +359,27 @@ int main() {
     Lexer lexer;
     lexer_init(&lexer, src);
 
-    while (1) {
-        Token t = lexer_next_token(&lexer);
 
-        printf("Token type: %d", t.type);
 
-        if (t.lexeme != NULL)
-            printf(" | lexeme: %s", t.lexeme);
 
-        if (t.type == TOKEN_NUMBER)
-            printf(" | value: %d", t.value);
 
-        printf(" | line: %d col: %d\n", t.line_number, t.col_num);
 
-        if (t.type == TOKEN_EOF)
-            break;
-    }
+    // while (1) {
+    //     Token t = lexer_next_token(&lexer);
 
-    return 0;
+    //     printf("Token type: %d", t.type);
+
+    //     if (t.lexeme != NULL)
+    //         printf(" | lexeme: %s", t.lexeme);
+
+    //     if (t.type == TOKEN_NUMBER)
+    //         printf(" | value: %d", t.value);
+
+    //     printf(" | line: %d col: %d\n", t.line_number, t.col_num);
+
+    //     if (t.type == TOKEN_EOF)
+    //         break;
+    // }
+
+    // return 0;
 }
