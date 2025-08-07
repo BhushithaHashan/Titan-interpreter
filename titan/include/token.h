@@ -49,4 +49,5 @@ typedef struct{
     int capasity;
 }Token_Array;
 
+int push_token(Token token,Token_Array *arr);
 #endif

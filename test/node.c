@@ -1,6 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef enum {
+    NODE_NUMBER,
+    NODE_IDENTIFIER,
+    NODE_BINARY,
+    NODE_LET
+} NodeType;
+
+typedef struct Node {
+    NodeType type;
+
+    // number
+    int value;
+
+    // identifier
+    char *name;
+
+    // binary
+    char op;
+    struct Node *left;
+    struct Node *right;
+
+    // let
+    struct Node *identifier;
+    struct Node *expression;
+} Node;
 typedef struct Node {
     char op;
     int val;
