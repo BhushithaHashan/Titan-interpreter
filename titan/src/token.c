@@ -20,8 +20,8 @@ int push_token(Token token,Token_Array *arr){
         arr->tokens = mem;
         arr->capasity = arr_cap*2;
     }
-    arr_cnt++;
     arr->tokens[arr_cnt] = token;
+    arr_cnt++;
     arr->count = arr_cnt;
     
 }
